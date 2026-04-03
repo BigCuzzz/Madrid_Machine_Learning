@@ -82,10 +82,19 @@ feature_importance = RandomForest.feature_importances_
 feature_names = model.named_steps["preprocessor"].get_feature_names_out()
 series = pd.Series(feature_importance,index=feature_names)
 series = series.sort_values(ascending=False)
+series.index = series.index.str.replace("num__", "")
 series.head(10).sort_values().plot(kind="barh")
-#plt.figure(figsize=(12, 8))
 plt.yticks(fontsize=8)
 plt.show()
+
+#Series with aggregated opponents
+opponent_mask = series.index.str.startswith("cat__opponent_")
+opponent_total = series[opponent_mask].sum()
+series_no_opponent = series[~opponent_mask]
+series_opponent_agg = series_no_opponent.copy()
+series_opponent_agg["opponent"] = opponent_total
+series_opponent_agg = series_opponent_agg.sort_values(ascending=False)
+print(series_opponent_agg)
 
 
 # Permutation Importance and series plot
@@ -103,6 +112,7 @@ y_pred_train = model.predict(X_train)
 y_pred_test = model.predict(X_test)
 
 # Evaluate
+print("Random Forest for Madrid matches: \n\n")
 print("Training accuracy:", round(accuracy_score(y_train, y_pred_train), 3))
 print("Test accuracy:", round(accuracy_score(y_test, y_pred_test), 3))
 print("\nClassification report:\n")

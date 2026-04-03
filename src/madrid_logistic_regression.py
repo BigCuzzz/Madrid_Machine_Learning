@@ -74,10 +74,11 @@ y_pred_train = model.predict(X_train)
 y_pred_test = model.predict(X_test)
 
 # Evaluate
+print("Logistic regression for Madrid matches: \n\n")
 print("Training accuracy:", round(accuracy_score(y_train, y_pred_train), 3))
 print("Test accuracy:", round(accuracy_score(y_test, y_pred_test), 3))
 print("\nClassification report:\n")
-print(classification_report(y_test, y_pred_test))
+print(classification_report(y_test, y_pred_test, zero_division=0))
 
 #Confusion matrix
 print("\n\nConfusion Matrix:\n")

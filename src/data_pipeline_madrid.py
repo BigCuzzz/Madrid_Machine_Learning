@@ -93,7 +93,7 @@ def Convert_to_homeaway(df):
     return df
 
 def form_last5_games(df):
-    #Total points last 5 games (10 is max, 0 is min)
+    #Total points last 5 games (15 is max, 0 is min)
     #Goal difference last 5 games
     #Shot difference last 5 games
     df["points_last_5_games"] = df["points"].shift(1).rolling(5,min_periods=5).sum()

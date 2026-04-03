@@ -4,3 +4,5 @@ Target.md
 /csv
 notes.txt
 /inspo
+/src/__pycache__
+/src/to_be_implemented

@@ -59,6 +59,45 @@ def load_raw_laliga():
     df = pd.concat([df_2010,df_2011,df_2012,df_2013,df_2014,df_2015,df_2016,df_2017,df_2018,df_2019,df_2020,df_2021,df_2022,df_2023,df_2024])
     return df
 
+
+def convert_to_long_format(df):
+    #Home teams Dataframe
+    df_home = df.copy()
+    df_home["is_home"] = 1
+    df_home["GD"] = df_home["FTHG"] - df_home["FTAG"]
+    df_home = df_home.rename(columns={"HomeTeam": "Team","AwayTeam":"Opponent","FTHG":"GF","FTAG":"GA","HS":"SF","AS":"SA","HST":"SoTF","AST":"SoTA"})
+    df_home["SD"] = df_home["SF"] - df_home["SA"]
+    df_home["points"] = 0
+    df_home.loc[df_home["FTR"] == "H", "points"] = 3
+    df_home.loc[df_home["FTR"] == "D", "points"] = 1
+
+
+    #Away teams Dataframe
+    df_away = df.copy()
+    df_away["is_home"] = 0
+    """df_away["Team"] = df_away["AwayTeam"]
+    df_away["Opponent"] = df_away["HomeTeam"]"""
+    df_away["GD"] = df_away["FTAG"] - df_away["FTHG"]
+    df_away = df_away.rename(columns={"HomeTeam": "Opponent","AwayTeam":"Team","FTHG":"GA","FTAG":"GF","AS":"SF","HS":"SA","AST":"SoTF","HST":"SoTA"})
+    df_away["SD"] = df_away["SF"] - df_away["SA"]
+    df_away["points"] = 0
+    df_away.loc[df_away["FTR"] == "A", "points"] = 3
+    df_away.loc[df_away["FTR"] == "D", "points"] = 1
+
+    #Concat dataframes
+    cols = ["Date", "Team", "Opponent", "is_home", "GF", "GA", "GD", "points","SF","SA","SD","SoTF","SoTA"]
+    df_home = df_home[cols]
+    df_away = df_away[cols]
+    long_form_df = pd.concat([df_home, df_away], ignore_index=True)
+    long_form_df["Date"] = pd.to_datetime(long_form_df["Date"], dayfirst=True, format="mixed")
+    long_form_df = long_form_df.sort_values(["Team", "Date"]).reset_index(drop=True)
+    #Debug Sort:   long_form_df = long_form_df.sort_values(["Date", "Team", "is_home"]).reset_index(drop=True)
+    return long_form_df
+
+def form_last5_games(df):
+    pass
+    #groupby("team").shift(1).rolling(5).
+
 def print_info(df):
     print(df.head(10))
     print(len(df))
@@ -66,8 +105,10 @@ def print_info(df):
 
 def build_df(df):
     df = clean_dataset(df)
-    df = Convert_to_homeaway(df)
-    df = convert_res_to_points(df)
+    print(df.head(20),"\n\n")
+    df = convert_to_long_format(df)
+    print(df.head(20))
+    quit()
     df = form_last5_games(df)
     df = drop_changed_columns(df)
     return df
